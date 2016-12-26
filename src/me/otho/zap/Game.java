@@ -44,6 +44,8 @@ public class Game {
     private GLFWWindowSizeCallback wsCallback;
     private Callback debugProc;
     
+    
+    
     public void glinit() {
     	if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
