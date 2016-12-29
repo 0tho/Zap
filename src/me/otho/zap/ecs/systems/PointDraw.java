@@ -28,9 +28,19 @@ public class PointDraw extends System{
 		
 		glPushMatrix();		
 		glTranslatef(pos.getX(), pos.getY(), 0);
-		glLineWidth(3);
-		glColor3f(1, 1, 1);
+		glLineWidth(1);
+		glColor3f(1, 0, 1);
 		glBegin(GL_POINTS);;
+			glVertex2f(-1, 0);
+			glVertex2f(1, 0);
+			glVertex2f(0, -1);
+			glVertex2f(0, 1);
+			
+			glVertex2f(-2, 0);
+			glVertex2f(2, 0);
+			glVertex2f(0, -2);
+			glVertex2f(0, 2);
+			
 			glVertex2f(0, 0);
 		glEnd();
 		glPopMatrix();

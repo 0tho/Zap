@@ -50,14 +50,18 @@ public abstract class World {
 		orderedSystems = new ArrayList<System>(classSystemMap.values());
 		
 		Collections.sort(orderedSystems);
+//		for(System s: orderedSystems) 
+//			java.lang.System.out.println(s.getPriority());
 	}
 	
 	public void update(double deltaTime) {
 		for ( System sys : orderedSystems ) {
 			Class<?> componentType = sys.getComponentType();
+			sys.setup();
 			for( Entity en : classEntityMap.get(componentType)) {
-				classSystemMap.get(componentType).process(en, deltaTime);
-			}		
+				sys.process(en, deltaTime);
+			}
+			sys.finish();
 		}
 	}
 }

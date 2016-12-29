@@ -5,20 +5,20 @@ import java.util.HashMap;
 
 public class Entity {
 
-	private HashMap<Class<?>, Component> components;
+	private HashMap<Class<?>, IComponent> components;
 	
-	public Entity(ArrayList<Component> components) {
-		this.components = new HashMap<Class<?>, Component>();
+	public Entity(ArrayList<IComponent> components) {
+		this.components = new HashMap<Class<?>, IComponent>();
 		
-		for( Component c : components) {
+		for( IComponent c : components) {
 			this.components.put(c.getClass(), c);
 		}
 	}
 	
 	public Entity clone() {
-		ArrayList<Component> components = new ArrayList<Component>();
+		ArrayList<IComponent> components = new ArrayList<IComponent>();
 		
-		for( Component c : this.components.values() ) {
+		for( IComponent c : this.components.values() ) {
 			components.add(c.clone());
 		}
 		
@@ -27,7 +27,7 @@ public class Entity {
 		return ret;
 	}
 	
-	public Component getComponent(Class<?> clas) {
+	public IComponent getComponent(Class<?> clas) {
 		return components.get(clas); 
 	}
 	

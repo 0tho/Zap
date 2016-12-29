@@ -15,6 +15,12 @@ public class System implements Comparator<System>, Comparable<System>{
 	public void process(Entity en, double detlaTime) {
 		
 	}
+	public void setup() {
+			
+	}
+	public void finish() {
+		
+	}
 	
 	public Integer getPriority() {
 		return priority;

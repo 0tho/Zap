@@ -10,7 +10,6 @@ import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
-import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -28,7 +27,7 @@ public class Game {
 	protected int fbWidth = 800;
 	protected int fbHeight = 600;
     
-	protected boolean windowed = false;
+	protected boolean windowed = true;
     protected boolean[] keyDown = new boolean[GLFW.GLFW_KEY_LAST];
     protected boolean leftMouseDown = false;
     protected boolean rightMouseDown = false;
@@ -40,7 +39,7 @@ public class Game {
     private GLFWKeyCallback keyCallback;
     private GLFWCursorPosCallback cpCallback;
     private GLFWMouseButtonCallback mbCallback;
-    private GLFWFramebufferSizeCallback fbCallback;
+//    private GLFWFramebufferSizeCallback fbCallback;
     private GLFWWindowSizeCallback wsCallback;
     private Callback debugProc;
     
@@ -52,8 +51,7 @@ public class Game {
 
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);       
 
         long monitor = glfwGetPrimaryMonitor();
         GLFWVidMode vidmode = glfwGetVideoMode(monitor);
@@ -64,19 +62,11 @@ public class Game {
             fbHeight = height;
         }
         window = glfwCreateWindow(width, height, "Little Space Shooter Game", !windowed ? monitor : 0L, NULL);
-        if (window == NULL) {
+        if (window == NULL) 
             throw new AssertionError("Failed to create the GLFW window");
-        }
+        
         glfwSetCursor(window, glfwCreateStandardCursor(GLFW_HAND_CURSOR));
         
-        glfwSetFramebufferSizeCallback(window, fbCallback = new GLFWFramebufferSizeCallback() {
-            public void invoke(long window, int width, int height) {
-                if (width > 0 && height > 0 && (Game.this.fbWidth != width || Game.this.fbHeight != height)) {
-                	Game.this.fbWidth = width;
-                	Game.this.fbHeight = height;
-                }
-            }
-        });
         glfwSetWindowSizeCallback(window, wsCallback = new GLFWWindowSizeCallback() {
             public void invoke(long window, int width, int height) {
                 if (width > 0 && height > 0 && (Game.this.width != width || Game.this.height != height)) {
@@ -123,30 +113,37 @@ public class Game {
                 }
             }
         });
+        
+        // Center our window
+ 		glfwSetWindowPos(
+ 			window,
+ 			(vidmode.width() - width) / 2,
+ 			(vidmode.height() - height) / 2
+ 		);
         glfwMakeContextCurrent(window);
-        glfwSwapInterval(0);
-        glfwShowWindow(window);
+        
+        glfwSwapInterval(1);        
 
         IntBuffer framebufferSize = BufferUtils.createIntBuffer(2);
         nglfwGetFramebufferSize(window, memAddress(framebufferSize), memAddress(framebufferSize) + 4);
         fbWidth = framebufferSize.get(0);
         fbHeight = framebufferSize.get(1);
         caps = GL.createCapabilities();
+        
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(0, width, 0, height, 1, -1);
+        glOrtho(0, width, height, 0, 1, -1);
         glMatrixMode(GL_MODELVIEW);
         if (!caps.OpenGL20) {
             throw new AssertionError("This demo requires OpenGL 2.0.");
         }
         debugProc = GLUtil.setupDebugMessageCallback();
-
-        /* Create all needed GL resources */
-
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        
+        glEnable(GL_TEXTURE_2D);
+        
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
+        glfwShowWindow(window);
     }
     
     private void loop() {
@@ -183,7 +180,7 @@ public class Game {
             keyCallback.free();
             cpCallback.free();
             mbCallback.free();
-            fbCallback.free();
+            //fbCallback.free();
             wsCallback.free();
             glfwDestroyWindow(window);
         } catch (Throwable t) {

@@ -1,8 +1,8 @@
 package me.otho.zap.ecs.components;
 
-import me.otho.zap.ecs.Component;
+import me.otho.zap.ecs.IComponent;
 
-public class Position2D extends Component{
+public class Position2D implements IComponent{
 	
 	private float x;
 	private float y;
