@@ -55,5 +55,10 @@ public class Position2D implements IComponent{
 		
 		return (float) Math.sqrt(dx*dx + dy*dy);
 	}
+
+	public void add(float x, float y) {
+		this.x += x;
+		this.y += y;
+	}
 	
 }

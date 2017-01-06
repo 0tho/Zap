@@ -1,5 +1,8 @@
 package me.otho.zap.ecs;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import me.otho.zap.ecs.components.Position2D;
 
 public class World2D extends World{
@@ -26,5 +29,9 @@ public class World2D extends World{
 		
 		return false;
 	}
+	
+
+	
+
 
 }

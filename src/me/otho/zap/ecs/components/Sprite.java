@@ -25,11 +25,11 @@ public class Sprite implements IComponent{
 		
 		int[] pixels_raw = new int[width * height * 4];
 		pixels_raw = spriteSheet.getRGB(x, y, width, height, null, 0, width);
-		
+				
 		ByteBuffer pixels = BufferUtils.createByteBuffer(width * height * 4);
 		
-		for ( int i = 0; i< width; i++ ) {
-			for ( int j = 0; j< height; j++ ) {
+		for ( int i = 0; i< height; i++ ) {
+			for ( int j = 0; j< width; j++ ) {
 				int pixel = pixels_raw[i*width + j];
 				
 				pixels.put((byte) ((pixel >> 16) & 0xFF));
@@ -37,7 +37,7 @@ public class Sprite implements IComponent{
 				pixels.put((byte) ((pixel >> 0) & 0xFF));
 				pixels.put((byte) ((pixel >> 24) & 0xFF));
 			}
-		}
+		}		
 		
 		pixels.flip();
 		
@@ -71,7 +71,6 @@ public class Sprite implements IComponent{
 				((int)(frame / (spriteSheet.getWidth() / width)))*height, 
 				width, 
 				height);
-		System.out.println( (frame % (spriteSheet.getWidth() / width))*width + " / " + ((int)(frame / (spriteSheet.getWidth() / width)))*height);
 	}
 
 	public Sprite clone() {

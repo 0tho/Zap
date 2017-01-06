@@ -19,6 +19,8 @@ import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.Callback;
 
+import me.otho.zap.util.Timer;
+
 public class Game {
 	
 	protected long window;
@@ -61,7 +63,7 @@ public class Game {
             fbWidth = width;
             fbHeight = height;
         }
-        window = glfwCreateWindow(width, height, "Little Space Shooter Game", !windowed ? monitor : 0L, NULL);
+        window = glfwCreateWindow(width, height, "Dodge Game", !windowed ? monitor : 0L, NULL);
         if (window == NULL) 
             throw new AssertionError("Failed to create the GLFW window");
         
@@ -80,6 +82,8 @@ public class Game {
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 if (key == GLFW_KEY_UNKNOWN) 
                     return;
+                
+                // System.out.println(key);
                 if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
                     glfwSetWindowShouldClose(window, true);
                 }
@@ -147,12 +151,42 @@ public class Game {
     }
     
     private void loop() {
+    	double frame_cap = 1.0/60.0;
+    	double frameTime = 0;
+    	int frames = 0;
+    	double time = Timer.getTime();
+    	double unprocessed = 0;
+    	
         while (!glfwWindowShouldClose(window)) {
-            glfwPollEvents();
-            glViewport(0, 0, fbWidth, fbHeight);
-            update();
-            draw();
-            glfwSwapBuffers(window);
+        	boolean shouldRender = false;
+        	
+        	double time_2 = Timer.getTime();
+        	double passed = time_2 - time;
+        	unprocessed += passed;        	
+        	frameTime += passed;
+        	
+        	time = time_2;
+        	
+        	while(unprocessed >= frame_cap ) {
+        		unprocessed -= frame_cap;
+        		glfwPollEvents();
+        		update();
+        		shouldRender = true;
+        		
+        		if ( frameTime >= 1.0 ) {
+        			frameTime = 0;
+        			//System.out.println("FPS: " + frames);
+        			frames = 0;
+        		}
+        	}
+        	
+            if ( shouldRender ) {
+            	glViewport(0, 0, fbWidth, fbHeight);            
+                draw();
+                glfwSwapBuffers(window);
+                frames++;
+            }                 
+            
         }
     }
     
@@ -188,6 +222,10 @@ public class Game {
         } finally {
             glfwTerminate();
         }
+	}
+	
+	public boolean isKeyDown(int code) {
+		return keyDown[code];
 	}
 
 }

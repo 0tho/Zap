@@ -32,6 +32,7 @@ public abstract class World {
 		ArrayList<Class<?>> componentTypes = en.getComponentTypes();
 		
 		for( Class<?> clas : componentTypes ) {
+			java.lang.System.out.println(clas.getName());
 			if ( !classEntityMap.containsKey(clas)) {
 				classEntityMap.put(clas, new ArrayList<Entity>());
 			}
@@ -50,18 +51,26 @@ public abstract class World {
 		orderedSystems = new ArrayList<System>(classSystemMap.values());
 		
 		Collections.sort(orderedSystems);
-//		for(System s: orderedSystems) 
-//			java.lang.System.out.println(s.getPriority());
+		for(System s: orderedSystems) 
+			java.lang.System.out.println(s.getClass().getName());
 	}
 	
 	public void update(double deltaTime) {
 		for ( System sys : orderedSystems ) {
 			Class<?> componentType = sys.getComponentType();
 			sys.setup();
-			for( Entity en : classEntityMap.get(componentType)) {
-				sys.process(en, deltaTime);
+			//java.lang.System.out.println(componentType.getName());
+			ArrayList<Entity> entities = classEntityMap.get(componentType);
+			if( entities != null ) {
+				for( Entity en : classEntityMap.get(componentType)) {
+					sys.process(en, deltaTime);
+				}
 			}
 			sys.finish();
 		}
+	}
+	
+	public void clearEntities() {
+		classEntityMap = new HashMap<Class<?>, ArrayList<Entity>>();
 	}
 }
