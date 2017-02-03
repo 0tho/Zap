@@ -1,4 +1,4 @@
-package me.otho.zap;
+package me.otho.zap.simulation;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
@@ -28,9 +28,16 @@ public class Game {
 	protected int height = 600;
 	protected int fbWidth = 800;
 	protected int fbHeight = 600;
+	
+	// Expected fps
+	protected int fps = 60;
+	// Current fps
+	protected int frames;
+	
+	protected String title = "Zap Engine Game";
     
 	protected boolean windowed = true;
-    protected boolean[] keyDown = new boolean[GLFW.GLFW_KEY_LAST];
+    
     protected boolean leftMouseDown = false;
     protected boolean rightMouseDown = false;
     
@@ -45,30 +52,46 @@ public class Game {
     private GLFWWindowSizeCallback wsCallback;
     private Callback debugProc;
     
+    public Game(String title, int width, int height, int fps) {
+    	this.title = title;
+    	this.width = width;
+    	this.height = height;
+    	this.fps = fps;    	
+    }
     
-    
-    public void glinit() {
+    public final void glinit() {
+    	// Try to initizalize glfw (the library that handles window)
     	if (!glfwInit())
             throw new IllegalStateException("Unable to initialize GLFW");
 
+    	// Configurate window
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);       
 
+        // Get primary monitor
         long monitor = glfwGetPrimaryMonitor();
         GLFWVidMode vidmode = glfwGetVideoMode(monitor);
+        
+        // Resizes window to fullscreen if game not windowed
         if (!windowed) {
             width = vidmode.width();
             height = vidmode.height();
             fbWidth = width;
             fbHeight = height;
         }
-        window = glfwCreateWindow(width, height, "Dodge Game", !windowed ? monitor : 0L, NULL);
+        
+        // Creates the window
+        window = glfwCreateWindow(width, height, title, !windowed ? monitor : 0L, NULL);
+        
+        // Check if window was created
         if (window == NULL) 
             throw new AssertionError("Failed to create the GLFW window");
         
+        // Sets window cursor
         glfwSetCursor(window, glfwCreateStandardCursor(GLFW_HAND_CURSOR));
         
+        // Callback for window resize
         glfwSetWindowSizeCallback(window, wsCallback = new GLFWWindowSizeCallback() {
             public void invoke(long window, int width, int height) {
                 if (width > 0 && height > 0 && (Game.this.width != width || Game.this.height != height)) {
@@ -78,22 +101,25 @@ public class Game {
             }
         });
         
-        glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
-            public void invoke(long window, int key, int scancode, int action, int mods) {
-                if (key == GLFW_KEY_UNKNOWN) 
-                    return;
-                
-                // System.out.println(key);
-                if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-                    glfwSetWindowShouldClose(window, true);
-                }
-                if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-                    keyDown[key] = true;
-                } else {
-                    keyDown[key] = false;
-                }
-            }
-        });
+        // Callback for when a key is pressed
+//        glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
+//            public void invoke(long window, int key, int scancode, int action, int mods) {
+//                if (key == GLFW_KEY_UNKNOWN) 
+//                    return;
+//                
+//                // System.out.println(key);
+//                if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+//                    glfwSetWindowShouldClose(window, true);
+//                }
+//                if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+//                    keyDown[key] = true;
+//                } else {
+//                    keyDown[key] = false;
+//                }
+//            }
+//        });
+        
+        // Callback for mouse movement
         glfwSetCursorPosCallback(window, cpCallback = new GLFWCursorPosCallback() {
             public void invoke(long window, double xpos, double ypos) {
                 float normX = (float) ((xpos - width/2.0) / width * 2.0);
@@ -102,6 +128,8 @@ public class Game {
                 Game.this.mouseY = Math.max(-height/2.0f, Math.min(height/2.0f, normY));
             }
         });
+        
+        // Callback for mouse click
         glfwSetMouseButtonCallback(window, mbCallback = new GLFWMouseButtonCallback() {
             public void invoke(long window, int button, int action, int mods) {
                 if (button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -118,42 +146,43 @@ public class Game {
             }
         });
         
-        // Center our window
+        // Center our window on monitor
  		glfwSetWindowPos(
  			window,
  			(vidmode.width() - width) / 2,
  			(vidmode.height() - height) / 2
  		);
+ 		
+ 		// Creates a context for our window
         glfwMakeContextCurrent(window);
         
+        // VSYNC
         glfwSwapInterval(1);        
 
+        // Get framebuffersize
         IntBuffer framebufferSize = BufferUtils.createIntBuffer(2);
         nglfwGetFramebufferSize(window, memAddress(framebufferSize), memAddress(framebufferSize) + 4);
+        
+        // Width of framebuffer
         fbWidth = framebufferSize.get(0);
+        
+        // Heihgt of framebuffer
         fbHeight = framebufferSize.get(1);
+        
+        // Opengl capabilities
         caps = GL.createCapabilities();
         
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glOrtho(0, width, height, 0, 1, -1);
-        glMatrixMode(GL_MODELVIEW);
         if (!caps.OpenGL20) {
             throw new AssertionError("This demo requires OpenGL 2.0.");
         }
         debugProc = GLUtil.setupDebugMessageCallback();
         
-        glEnable(GL_TEXTURE_2D);
-        
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        
         glfwShowWindow(window);
     }
     
-    private void loop() {
-    	double frame_cap = 1.0/60.0;
+    private final void loop() {
+    	double frame_cap = 1.0/fps;
     	double frameTime = 0;
-    	int frames = 0;
     	double time = Timer.getTime();
     	double unprocessed = 0;
     	
@@ -167,15 +196,15 @@ public class Game {
         	
         	time = time_2;
         	
+        	glfwPollEvents();
+        	
         	while(unprocessed >= frame_cap ) {
-        		unprocessed -= frame_cap;
-        		glfwPollEvents();
+        		unprocessed -= frame_cap;        		
         		update();
         		shouldRender = true;
         		
         		if ( frameTime >= 1.0 ) {
         			frameTime = 0;
-        			//System.out.println("FPS: " + frames);
         			frames = 0;
         		}
         	}
@@ -189,7 +218,37 @@ public class Game {
             
         }
     }
-    
+	
+	public final void run() {
+		 try {
+			glinit();
+			init();
+            loop();
+
+            if (debugProc != null)
+                debugProc.free();
+
+            //keyCallback.free();
+            cpCallback.free();
+            mbCallback.free();
+            //fbCallback.free();
+            wsCallback.free();
+            glfwDestroyWindow(window);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        } finally {
+        	glfwTerminate();
+        	finish();        
+        }
+	}
+	
+	public final boolean isKeyDown(int code) {
+		return glfwGetKey(window, code) == GLFW_PRESS;
+	}
+	
+    //------------------------------------------
+	// Function below this line should be extended
+	
     public void init() {
     	System.out.println("Initializing Game");
     }
@@ -201,31 +260,9 @@ public class Game {
     public void draw() {
     	System.out.println("Drawing");
     }
-	
-	public void run() {
-		 try {
-			glinit();
-			init();
-            loop();
-
-            if (debugProc != null)
-                debugProc.free();
-
-            keyCallback.free();
-            cpCallback.free();
-            mbCallback.free();
-            //fbCallback.free();
-            wsCallback.free();
-            glfwDestroyWindow(window);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        } finally {
-            glfwTerminate();
-        }
-	}
-	
-	public boolean isKeyDown(int code) {
-		return keyDown[code];
+    
+    public void finish() {
+	    
 	}
 
 }

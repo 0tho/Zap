@@ -2,8 +2,6 @@ package me.otho.zap.resources.providers;
 
 import java.io.InputStream;
 
-import me.otho.zap.resources.IResourceProvider;
-
 public class JarProvider implements IResourceProvider {
 
 	@Override

@@ -5,8 +5,6 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-import me.otho.zap.resources.ITypeLoader;
-
 public class ImageLoader implements ITypeLoader{
 
 	@Override

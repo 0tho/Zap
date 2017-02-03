@@ -1,4 +1,4 @@
-package me.otho.zap.resources;
+package me.otho.zap.resources.loaders;
 
 import java.io.IOException;
 import java.io.InputStream;

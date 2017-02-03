@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
+import me.otho.zap.resources.loaders.ITypeLoader;
+import me.otho.zap.resources.providers.IResourceProvider;
+
 public class ResourceLoader {
 	
 	private HashMap<Class<?>, ITypeLoader> loaders;

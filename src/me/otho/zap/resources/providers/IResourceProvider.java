@@ -1,4 +1,4 @@
-package me.otho.zap.resources;
+package me.otho.zap.resources.providers;
 
 import java.io.InputStream;
 
