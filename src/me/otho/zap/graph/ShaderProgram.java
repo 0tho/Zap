@@ -1,5 +1,5 @@
 // Based on https://lwjglgamedev.gitbooks.io/3d-game-development-with-lwjgl/content/chapter4/chapter4.html
-package me.otho.zap.shader;
+package me.otho.zap.graph;
 
 import static org.lwjgl.opengl.GL20.*;
 

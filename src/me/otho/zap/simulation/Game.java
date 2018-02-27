@@ -10,6 +10,7 @@ import java.nio.IntBuffer;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
+import org.lwjgl.glfw.GLFWFramebufferSizeCallback;
 import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWMouseButtonCallback;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -48,7 +49,7 @@ public class Game {
     private GLFWKeyCallback keyCallback;
     private GLFWCursorPosCallback cpCallback;
     private GLFWMouseButtonCallback mbCallback;
-//    private GLFWFramebufferSizeCallback fbCallback;
+    private GLFWFramebufferSizeCallback fbCallback;
     private GLFWWindowSizeCallback wsCallback;
     private Callback debugProc;
     
@@ -102,22 +103,17 @@ public class Game {
         });
         
         // Callback for when a key is pressed
-//        glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
-//            public void invoke(long window, int key, int scancode, int action, int mods) {
-//                if (key == GLFW_KEY_UNKNOWN) 
-//                    return;
-//                
-//                // System.out.println(key);
-//                if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
-//                    glfwSetWindowShouldClose(window, true);
-//                }
-//                if (action == GLFW_PRESS || action == GLFW_REPEAT) {
-//                    keyDown[key] = true;
-//                } else {
-//                    keyDown[key] = false;
-//                }
-//            }
-//        });
+        glfwSetKeyCallback(window, keyCallback = new GLFWKeyCallback() {
+            public void invoke(long window, int key, int scancode, int action, int mods) {
+                if (key == GLFW_KEY_UNKNOWN) 
+                    return;
+                
+                // System.out.println(key);
+                if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
+                    glfwSetWindowShouldClose(window, true);
+                }
+            }
+        });
         
         // Callback for mouse movement
         glfwSetCursorPosCallback(window, cpCallback = new GLFWCursorPosCallback() {
@@ -228,7 +224,7 @@ public class Game {
             if (debugProc != null)
                 debugProc.free();
 
-            //keyCallback.free();
+            keyCallback.free();
             cpCallback.free();
             mbCallback.free();
             //fbCallback.free();
